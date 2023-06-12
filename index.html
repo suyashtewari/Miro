@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Miro</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #596275;
+    }
+
+    header {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+    }
+
+    footer {
+      background-color: #333;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .maze-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .maze {
+      border: 1px solid #596275;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+    }
+
+    .stat-label {
+      font-size: 18px;
+      font-weight: bold;
+      margin-right: 5px;
+      color: #fff;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      color: #ff9f1c;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Miro</h1>
+  </header>
+
+  <div class="maze-container">
+    <canvas id="mazeCanvas" width="800" height="800" class="maze"></canvas>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Moves:</div>
+      <div id="moveCount" class="stat-value">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Time:</div>
+      <div id="stopwatch" class="stat-value">0:00</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2023 Miro. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('mazeCanvas');
+    const context = canvas.getContext('2d');
+    const cellSize = 50;
+    const mazeSize = 15;
+    let maze, playerX, playerY;
+    let moveCount = 0;
+    let stopwatchInterval;
+    let stopwatchSeconds = 0;
+
+    function generateMaze() {
+      const maze = [];
+      for (let i = 0; i < mazeSize; i++) {
+        maze[i] = [];
+        for (let j = 0; j < mazeSize; j++) {
+          maze[i][j] = 1;
+        }
+      }
+
+      function generatePaths(x, y) {
+        const directions = [[-2, 0], [2, 0], [0, -2], [0, 2]];
+        directions.sort(() => Math.random() - 0.5);
+
+        for (let i = 0; i < directions.length; i++) {
+          const [dx, dy] = directions[i];
+          const nx = x + dx;
+          const ny = y + dy;
+
+          if (nx >= 0 && nx < mazeSize && ny >= 0 && ny < mazeSize && maze[nx][ny] === 1) {
+            maze[x + dx / 2][y + dy / 2] = 0;
+            maze[nx][ny] = 0;
+            generatePaths(nx, ny);
+          }
+        }
+      }
+
+      const startX = Math.floor(Math.random() * (mazeSize - 1) / 2) * 2 + 1;
+      const startY = Math.floor(Math.random() * (mazeSize - 1) / 2) * 2 + 1;
+      generatePaths(startX, startY);
+
+      let endX, endY;
+      do {
+        endX = Math.floor(Math.random() * (mazeSize - 1) / 2) * 2 + 1;
+        endY = Math.floor(Math.random() * (mazeSize - 1) / 2) * 2 + 1;
+      } while (maze[endX][endY] === 1);
+
+      return {
+        maze,
+        startX,
+        startY,
+        endX,
+        endY
+      };
+    }
+
+    function drawMaze() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < mazeSize; i++) {
+            for (let j = 0; j < mazeSize; j++) {
+            const x = j * cellSize;
+            const y = i * cellSize;
+
+            if (maze.maze[i][j] === 1 || (maze.maze[i][j] === 0 && shouldAppearAsWall(i, j))) {
+                context.fillStyle = '#596275'; // Dark pastel gray for walls
+            } else {
+                context.fillStyle = '#f0efeb'; // Path color
+            }
+            context.fillRect(x, y, cellSize, cellSize);
+            }
+        }
+
+        context.fillStyle = '#ff9f1c'; // Player color
+        context.fillRect(playerX, playerY, cellSize, cellSize);
+
+        context.fillStyle = '#ff165d'; // Endpoint color
+        context.fillRect(maze.endY * cellSize, maze.endX * cellSize, cellSize, cellSize);
+    }
+
+    function shouldAppearAsWall(x, y) {
+        return Math.random() < 0.5; // hyperparamter that controls how many squares change
+    }
+
+    function movePlayer(dx, dy) {
+      const newX = playerX + dx;
+      const newY = playerY + dy;
+
+      if (
+        newX >= 0 &&
+        newX < mazeSize * cellSize &&
+        newY >= 0 &&
+        newY < mazeSize * cellSize &&
+        maze.maze[Math.floor(newY / cellSize)][Math.floor(newX / cellSize)] === 0
+      ) {
+        playerX = newX;
+        playerY = newY;
+        drawMaze();
+
+        moveCount++;
+        document.getElementById('moveCount').textContent = moveCount;
+
+        if (playerX === maze.endY * cellSize && playerY === maze.endX * cellSize) {
+          clearInterval(stopwatchInterval);
+          maze = generateMaze();
+          playerX = maze.startY * cellSize;
+          playerY = maze.startX * cellSize;
+          moveCount = 0;
+          document.getElementById('moveCount').textContent = moveCount;
+          startStopwatch();
+          drawMaze();
+        }
+      }
+    }
+
+    function startStopwatch() {
+      stopwatchSeconds = 0;
+      clearInterval(stopwatchInterval);
+      stopwatchInterval = setInterval(() => {
+        stopwatchSeconds++;
+        const minutes = Math.floor(stopwatchSeconds / 60);
+        const seconds = stopwatchSeconds % 60;
+        const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        document.getElementById('stopwatch').textContent = timeString;
+      }, 1000);
+    }
+
+    function initializeGame() {
+      maze = generateMaze();
+      playerX = maze.startY * cellSize;
+      playerY = maze.startX * cellSize;
+      drawMaze();
+      startStopwatch();
+    }
+
+    initializeGame();
+
+    document.addEventListener('keydown', function (event) {
+      const key = event.key.toLowerCase();
+
+      if (key === 'w') {
+        movePlayer(0, -cellSize);
+      } else if (key === 'a') {
+        movePlayer(-cellSize, 0);
+      } else if (key === 's') {
+        movePlayer(0, cellSize);
+      } else if (key === 'd') {
+        movePlayer(cellSize, 0);
+      }
+    });
+  </script>
+</body>
+</html>
