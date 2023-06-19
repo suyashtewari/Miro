@@ -2,7 +2,8 @@
 <html>
 
 <head>
-    <title>Miro</title>
+    <!-- change this for each update to Miro -->
+    <title>Miro 0.0.2</title>
     <style>
         /* Reset default styles */
         *,
@@ -154,28 +155,39 @@
 
         footer p {
             margin:
-            
-            0;
+
+                0;
         }
 
         #startButton {
-  background-color: #b9605c;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  font-size: 18px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
+            background-color: #b9605c;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-#startButton:hover {
-  background-color: #d3908d;
-}
+        #startButton:hover {
+            background-color: #d3908d;
+        }
 
+        #downloadButton {
+            background-color: #b9605c;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-
-
+        #downloadButton:hover {
+            background-color: #d3908d;
+        }
     </style>
 </head>
 
@@ -185,7 +197,8 @@
     </div>
     <div id="mazeContainer" class="gameContainer">
         <header>
-            <h1>Miro</h1>
+            <h1>Miro</h1><br>
+            <button id="downloadButton">Download Data</button>
         </header>
         <main>
             <div class="maze-container">
@@ -224,12 +237,15 @@
 
         const startButtonContainer = document.getElementById('startButtonContainer');
         const mazeContainer = document.getElementById('mazeContainer');
+        const downloadButton = document.getElementById('downloadButton');
+        downloadButton.addEventListener('click', downloadData);
 
         startButton.addEventListener('click', () => {
             startButtonContainer.style.display = 'none';
             mazeContainer.classList.add('show');
+            initializeGame();
         });
-        
+
         const canvas = document.getElementById('mazeCanvas');
         const context = canvas.getContext('2d');
         const cellSize = 50;
@@ -240,6 +256,44 @@
         let stopwatchSeconds = 0;
         let wallProbability = 0.5; // Initial wall probability value
         let mazesFinishedCount = 0;
+
+        function downloadData() {
+            // Create a CSV string with the header
+            let csv = "Maze Number,Moves,Time\n";
+
+            // Iterate through each completed maze
+            for (let i = 1; i <= mazesFinishedCount; i++) {
+                const movesValue = moveCounts[i];
+                const timeValue = timeValues[i];
+
+                // Append the maze number, moves, and time to the CSV string
+                csv += `${i},${movesValue},${timeValue}\n`;
+            }
+
+            // Create a Blob object with the CSV string
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+            // Create a temporary anchor element to trigger the download
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                // Set the anchor's attributes
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'maze_data.csv');
+
+                // Append the anchor to the body and trigger the download
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert('Your browser does not support downloading files.');
+            }
+        }
+
+        let moveCounts = [];
+        let timeValues = [];
+
+
 
         function generateMaze() {
             const maze = [];
@@ -275,7 +329,7 @@
             do {
                 endX = Math.floor(Math.random() * (mazeSize - 1) / 2) * 2 + 1;
                 endY = Math.floor(Math.random() * (mazeSize - 1) / 2) * 2 + 1;
-            } while (maze[endX][endY] === 1);
+            } while (maze[endX][endY] === 1 || (startX === endX && startY === endY));
 
             return {
                 maze,
@@ -338,13 +392,14 @@
                 newX >= 0 &&
                 newX < mazeSize * cellSize &&
                 newY >= 0 &&
-                newY < mazeSize * cellSize &&
-                maze.maze[Math.floor(newY / cellSize)][Math.floor(newX / cellSize)] === 0
+                newY < mazeSize * cellSize
             ) {
-                playerX = newX;
-                playerY = newY;
-                drawMaze();
-
+                if (maze.maze[Math.floor(newY / cellSize)][Math.floor(newX / cellSize)] === 0) {
+                    playerX = newX;
+                    playerY = newY;
+                    drawMaze();
+                }
+                // Count attempted moves even if they are blocked by walls
                 moveCount++;
                 document.getElementById('moveCount').textContent = moveCount;
 
@@ -365,7 +420,13 @@
         function finishMaze() {
             mazesFinishedCount++;
             document.getElementById('mazesFinishedCount').textContent = mazesFinishedCount;
+            const movesValue = moveCount;
+            const timeValue = document.getElementById('stopwatch').textContent;
+            moveCounts[mazesFinishedCount] = movesValue;
+            timeValues[mazesFinishedCount] = timeValue;
         }
+
+
 
         function startStopwatch() {
             stopwatchSeconds = 0;
@@ -392,8 +453,6 @@
             drawMaze();
             startStopwatch();
         }
-
-        initializeGame();
 
         document.addEventListener('keydown', function (event) {
             const key = event.key.toLowerCase();
