@@ -192,14 +192,14 @@
 </head>
 
 <body>
-    <audio id="sound1" src="menuselect.wav" preload="auto"></audio>
+    <audio id="sound1" src="https://github.com/suyashtewari/Miro/blob/ryan_sounds/menuselect.wav?raw=true" preload="auto"></audio>
     <div id="startButtonContainer">
         <button id="startButton" onclick="document.getElementById('sound1').play()">Miro</button>
     </div>
     <div id="mazeContainer" class="gameContainer">
         <header>
             <h1>Miro</h1><br>
-            <button id="downloadButton" onclick="soundEffect('menuselect.wav')">Download Data</button>
+            <button id="downloadButton" onclick="soundEffect('https://github.com/suyashtewari/Miro/blob/ryan_sounds/menuselect.wav?raw=true')">Download Data</button>
         </header>
         <main>
             <div class="maze-container">
@@ -224,7 +224,7 @@
             <div class="slider-container">
                 <div class="slider-label">Wall Probability:</div>
                 <input type="range" id="wallProbabilitySlider" min="0" max="1" step="0.01" value="0.5"
-                onchange="soundEffect('menuselect.wav');updateWallProbability(this.value);"/>
+                onchange="soundEffect('https://github.com/suyashtewari/Miro/blob/ryan_sounds/menuselect.wav?raw=true');updateWallProbability(this.value);"/>
                 <div id="wallProbabilityValue" class="stat-value">0.5</div>
             </div>
         </main>
@@ -242,16 +242,7 @@
         downloadButton.addEventListener('click', downloadData);
 
         startButton.addEventListener('click', () => {
-            soundEffect("menuselect.wav");
-            startButtonContainer.style.display = 'none';
-            mazeContainer.classList.add('show');
-            initializeGame();
-        });
-
-        const canvas = document.getElementById('mazeCanvas');
-        const context = canvas.getContext('2d');
-        const cellSize = 50;
-        const mazeSize = 15;
+            soundEffect("https://github.com/suyashtewari/Miro/blob/ryan_sounds/menuselect.wav?raw=true
         let maze, playerX, playerY;
         let moveCount = 0;
         let stopwatchInterval;
