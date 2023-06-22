@@ -199,7 +199,7 @@
     <div id="mazeContainer" class="gameContainer">
         <header>
             <h1>Miro</h1><br>
-            <button id="downloadButton" onclick="soundEffect('sounds/menuselect.wav')">Download Data</button>
+            <button id="downloadButton" onclick="soundEffect('menuselect.wav')">Download Data</button>
         </header>
         <main>
             <div class="maze-container">
@@ -224,7 +224,7 @@
             <div class="slider-container">
                 <div class="slider-label">Wall Probability:</div>
                 <input type="range" id="wallProbabilitySlider" min="0" max="1" step="0.01" value="0.5"
-                onchange="soundEffect('sounds/menuselect.wav');updateWallProbability(this.value);"/>
+                onchange="soundEffect('menuselect.wav');updateWallProbability(this.value);"/>
                 <div id="wallProbabilityValue" class="stat-value">0.5</div>
             </div>
         </main>
@@ -242,7 +242,7 @@
         downloadButton.addEventListener('click', downloadData);
 
         startButton.addEventListener('click', () => {
-            soundEffect("sounds/menuselect.wav");
+            soundEffect("menuselect.wav");
             startButtonContainer.style.display = 'none';
             mazeContainer.classList.add('show');
             initializeGame();
@@ -397,19 +397,19 @@
                 newY < mazeSize * cellSize
             ) {
                 if (maze.maze[Math.floor(newY / cellSize)][Math.floor(newX / cellSize)] === 0) {
-                    soundEffect("sounds/validmovement.wav");
+                    soundEffect("validmovement.wav");
                     playerX = newX;
                     playerY = newY;
                     drawMaze();
                 } else {
-                    soundEffect("sounds/ES_Volleyball Hit 4 - SFX Producer.wav");
+                    soundEffect("ES_Volleyball Hit 4 - SFX Producer.wav");
                 }
                 // Count attempted moves even if they are blocked by walls
                 moveCount++;
                 document.getElementById('moveCount').textContent = moveCount;
 
                 if (playerX === maze.endY * cellSize && playerY === maze.endX * cellSize) {
-                    soundEffect("sounds/win_sound.mp3");
+                    soundEffect("win_sound.mp3");
                     clearInterval(stopwatchInterval);
                     finishMaze();
                     maze = generateMaze();
