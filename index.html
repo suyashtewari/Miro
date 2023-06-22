@@ -409,7 +409,7 @@
                 document.getElementById('moveCount').textContent = moveCount;
 
                 if (playerX === maze.endY * cellSize && playerY === maze.endX * cellSize) {
-                    soundEffect("sounds/win_sound.mp3");
+                    soundEffect("win_sound.mp3");
                     clearInterval(stopwatchInterval);
                     finishMaze();
                     maze = generateMaze();
