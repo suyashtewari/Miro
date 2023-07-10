@@ -279,15 +279,16 @@
 
       function downloadData() {
         // Create a CSV string with the header
-        let csv = "Maze Number,Moves,Time\n";
+        let csv = "Maze Number,Moves,Time,Shortest Path\n";
 
         // Iterate through each completed maze
         for (let i = 1; i <= mazesFinishedCount; i++) {
           const movesValue = moveCounts[i];
           const timeValue = timeValues[i];
+          const shortestPathValue = shortestPaths[i];
 
           // Append the maze number, moves, and time to the CSV string
-          csv += `${i},${movesValue},${timeValue}\n`;
+          csv += `${i},${movesValue},${timeValue},${shortestPathValue}\n`;
         }
 
         // Create a Blob object with the CSV string
@@ -312,6 +313,7 @@
 
       let moveCounts = [];
       let timeValues = [];
+      let shortestPaths = [];
 
       function generateMaze() {
         const maze = [];
@@ -472,6 +474,7 @@
         const timeValue = document.getElementById("stopwatch").textContent;
         moveCounts[mazesFinishedCount] = movesValue;
         timeValues[mazesFinishedCount] = timeValue;
+        shortestPaths[mazesFinishedCount] = shortestPath(maze);
       }
 
       function startStopwatch() {
